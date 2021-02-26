@@ -1,10 +1,51 @@
-import React from 'react';
+import React,{ useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import CardItem from '../utils/card';
+import { CardGroup } from 'react-bootstrap';
+import { getPost } from '../../store/actions';
 
-const Article = () => {
+const Article = (props) => {
+  const posts = useSelector(state => state.posts);
+  const dispatch = useDispatch();
+
+  useEffect(()=>{
+    if(props.match.params.id){
+      dispatch(getPost(props.match.params.id)).then(({payload})=>{
+        if(!payload.singlePost.post){
+          props.history.push('/')
+        }
+      })
+
+    }
+  },[dispatch])
+
+
+  const myPost = posts.singlePost && posts.singlePost.post ? posts.singlePost.post:null
   return (
-    <div>
-      Arctic
-    </div>
+    <>
+      {
+        myPost ?
+          <>
+            <h1>{myPost.title}</h1>
+            <small>Gemaakt door {myPost.author.name} {myPost.author.lastname}</small>
+            <div>
+              {myPost.content}
+            </div>
+            <hr/>
+            <h3>gerelateerde berichten</h3>
+            <CardGroup>
+              {
+                myPost.related ?
+                myPost.related.map((item,index)=>(
+                  <CardItem item={item} key={index} />
+                ))
+                :null
+              }
+            </CardGroup>
+          </>
+        :null
+      }
+    </>
   )
 }
 
